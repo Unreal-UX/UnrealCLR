@@ -35,7 +35,7 @@ namespace UnrealEngine.Framework {
 	// Automatically generated
 
 	internal static class Shared {
-		internal const int checksum = 0x2C4;
+		internal const int checksum = 0x2CB;
 		internal static Dictionary<int, IntPtr> userFunctions = new();
 		private const string dynamicTypesAssemblyName = "UnrealEngine.DynamicTypes";
 		private static readonly ModuleBuilder moduleBuilder = AssemblyBuilder.DefineDynamicAssembly(new(dynamicTypesAssemblyName), AssemblyBuilderAccess.RunAndCollect).DefineDynamicModule(dynamicTypesAssemblyName);
@@ -55,7 +55,7 @@ namespace UnrealEngine.Framework {
 				int head = 0;
 				IntPtr* assertFunctions = (IntPtr*)buffer[position++];
 
-				Assert.outputMessage = (delegate* unmanaged[Cdecl]<string, void>)assertFunctions[head++];
+				Assert.outputMessage = (delegate* unmanaged[Cdecl]<byte[], void>)assertFunctions[head++];
 			}
 
 			unchecked {
@@ -71,9 +71,9 @@ namespace UnrealEngine.Framework {
 				int head = 0;
 				IntPtr* debugFunctions = (IntPtr*)buffer[position++];
 
-				Debug.log = (delegate* unmanaged[Cdecl]<LogLevel, string, void>)debugFunctions[head++];
-				Debug.handleException = (delegate* unmanaged[Cdecl]<string, void>)debugFunctions[head++];
-				Debug.addOnScreenMessage = (delegate* unmanaged[Cdecl]<int, float, int, string, void>)debugFunctions[head++];
+				Debug.log = (delegate* unmanaged[Cdecl]<LogLevel, byte[], void>)debugFunctions[head++];
+				Debug.exception = (delegate* unmanaged[Cdecl]<byte[], void>)debugFunctions[head++];
+				Debug.addOnScreenMessage = (delegate* unmanaged[Cdecl]<int, float, int, byte[], void>)debugFunctions[head++];
 				Debug.clearOnScreenMessages = (delegate* unmanaged[Cdecl]<void>)debugFunctions[head++];
 				Debug.drawBox = (delegate* unmanaged[Cdecl]<in Vector3, in Vector3, in Quaternion, int, Bool, float, byte, float, void>)debugFunctions[head++];
 				Debug.drawCapsule = (delegate* unmanaged[Cdecl]<in Vector3, float, float, in Quaternion, int, Bool, float, byte, float, void>)debugFunctions[head++];
@@ -93,7 +93,7 @@ namespace UnrealEngine.Framework {
 				Object.isValid = (delegate* unmanaged[Cdecl]<IntPtr, Bool>)objectFunctions[head++];
 				Object.load = (delegate* unmanaged[Cdecl]<ObjectType, string, IntPtr>)objectFunctions[head++];
 				Object.rename = (delegate* unmanaged[Cdecl]<IntPtr, string, void>)objectFunctions[head++];
-				Object.invoke = (delegate* unmanaged[Cdecl]<IntPtr, string, Bool>)objectFunctions[head++];
+				Object.invoke = (delegate* unmanaged[Cdecl]<IntPtr, byte[], Bool>)objectFunctions[head++];
 				Object.toActor = (delegate* unmanaged[Cdecl]<IntPtr, ActorType, IntPtr>)objectFunctions[head++];
 				Object.toComponent = (delegate* unmanaged[Cdecl]<IntPtr, ComponentType, IntPtr>)objectFunctions[head++];
 				Object.getID = (delegate* unmanaged[Cdecl]<IntPtr, uint>)objectFunctions[head++];
@@ -205,6 +205,7 @@ namespace UnrealEngine.Framework {
 				World.getActorByTag = (delegate* unmanaged[Cdecl]<string, ActorType, IntPtr>)worldFunctions[head++];
 				World.getActorByID = (delegate* unmanaged[Cdecl]<uint, ActorType, IntPtr>)worldFunctions[head++];
 				World.getFirstPlayerController = (delegate* unmanaged[Cdecl]<IntPtr>)worldFunctions[head++];
+				World.getGameMode = (delegate* unmanaged[Cdecl]<IntPtr>)worldFunctions[head++];
 				World.setOnActorBeginOverlapCallback = (delegate* unmanaged[Cdecl]<IntPtr, void>)worldFunctions[head++];
 				World.setOnActorBeginCursorOverCallback = (delegate* unmanaged[Cdecl]<IntPtr, void>)worldFunctions[head++];
 				World.setOnActorEndCursorOverCallback = (delegate* unmanaged[Cdecl]<IntPtr, void>)worldFunctions[head++];
@@ -331,8 +332,17 @@ namespace UnrealEngine.Framework {
 
 			unchecked {
 				int head = 0;
+				IntPtr* gameModeBaseFunctions = (IntPtr*)buffer[position++];
+
+				GameModeBase.swapPlayerControllers = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void>)gameModeBaseFunctions[head++];
+			}
+
+			unchecked {
+				int head = 0;
 				IntPtr* pawnFunctions = (IntPtr*)buffer[position++];
 
+				Pawn.isControlled = (delegate* unmanaged[Cdecl]<IntPtr, Bool>)pawnFunctions[head++];
+				Pawn.isPlayerControlled = (delegate* unmanaged[Cdecl]<IntPtr, Bool>)pawnFunctions[head++];
 				Pawn.getAutoPossessAI = (delegate* unmanaged[Cdecl]<IntPtr, AutoPossessAI>)pawnFunctions[head++];
 				Pawn.getAutoPossessPlayer = (delegate* unmanaged[Cdecl]<IntPtr, AutoReceiveInput>)pawnFunctions[head++];
 				Pawn.getUseControllerRotationYaw = (delegate* unmanaged[Cdecl]<IntPtr, Bool>)pawnFunctions[head++];
@@ -673,6 +683,7 @@ namespace UnrealEngine.Framework {
 				SpringArmComponent.getUnfixedCameraPosition = (delegate* unmanaged[Cdecl]<IntPtr, ref Vector3, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.getDesiredRotation = (delegate* unmanaged[Cdecl]<IntPtr, ref Quaternion, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.getTargetRotation = (delegate* unmanaged[Cdecl]<IntPtr, ref Quaternion, void>)springArmComponentFunctions[head++];
+				SpringArmComponent.getUsePawnControlRotation = (delegate* unmanaged[Cdecl]<IntPtr, Bool>)springArmComponentFunctions[head++];
 				SpringArmComponent.setDrawDebugLagMarkers = (delegate* unmanaged[Cdecl]<IntPtr, Bool, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.setCollisionTest = (delegate* unmanaged[Cdecl]<IntPtr, Bool, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.setCameraPositionLag = (delegate* unmanaged[Cdecl]<IntPtr, Bool, void>)springArmComponentFunctions[head++];
@@ -690,6 +701,7 @@ namespace UnrealEngine.Framework {
 				SpringArmComponent.setSocketOffset = (delegate* unmanaged[Cdecl]<IntPtr, in Vector3, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.setTargetArmLength = (delegate* unmanaged[Cdecl]<IntPtr, float, void>)springArmComponentFunctions[head++];
 				SpringArmComponent.setTargetOffset = (delegate* unmanaged[Cdecl]<IntPtr, in Vector3, void>)springArmComponentFunctions[head++];
+				SpringArmComponent.setUsePawnControlRotation = (delegate* unmanaged[Cdecl]<IntPtr, Bool, void>)springArmComponentFunctions[head++];
 			}
 
 			unchecked {
@@ -1211,13 +1223,10 @@ namespace UnrealEngine.Framework {
 		private float a;
 	}
 
-	[StructLayout(LayoutKind.Explicit, Size = 48)]
+	[StructLayout(LayoutKind.Sequential)]
 	partial struct Transform {
-		[FieldOffset(0)]
-		private Quaternion rotation;
-		[FieldOffset(16)]
 		private Vector3 location;
-		[FieldOffset(32)]
+		private Quaternion rotation;
 		private Vector3 scale;
 	}
 
@@ -1314,7 +1323,8 @@ namespace UnrealEngine.Framework {
 		SpotLight,
 		TriggerVolume,
 		PostProcessVolume,
-		LevelScript
+		LevelScript,
+		GameModeBase
 	}
 
 	internal enum ComponentType : int {
@@ -1344,7 +1354,7 @@ namespace UnrealEngine.Framework {
 	}
 
 	static unsafe partial class Assert {
-		internal static delegate* unmanaged[Cdecl]<string, void> outputMessage;
+		internal static delegate* unmanaged[Cdecl]<byte[], void> outputMessage;
 	}
 
 	static unsafe partial class CommandLine {
@@ -1354,9 +1364,9 @@ namespace UnrealEngine.Framework {
 	}
 
 	static unsafe partial class Debug {
-		internal static delegate* unmanaged[Cdecl]<LogLevel, string, void> log;
-		internal static delegate* unmanaged[Cdecl]<string, void> handleException;
-		internal static delegate* unmanaged[Cdecl]<int, float, int, string, void> addOnScreenMessage;
+		internal static delegate* unmanaged[Cdecl]<LogLevel, byte[], void> log;
+		internal static delegate* unmanaged[Cdecl]<byte[], void> exception;
+		internal static delegate* unmanaged[Cdecl]<int, float, int, byte[], void> addOnScreenMessage;
 		internal static delegate* unmanaged[Cdecl]<void> clearOnScreenMessages;
 		internal static delegate* unmanaged[Cdecl]<in Vector3, in Vector3, in Quaternion, int, Bool, float, byte, float, void> drawBox;
 		internal static delegate* unmanaged[Cdecl]<in Vector3, float, float, in Quaternion, int, Bool, float, byte, float, void> drawCapsule;
@@ -1373,7 +1383,7 @@ namespace UnrealEngine.Framework {
 		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool> isValid;
 		internal static delegate* unmanaged[Cdecl]<ObjectType, string, IntPtr> load;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, string, void> rename;
-		internal static delegate* unmanaged[Cdecl]<IntPtr, string, Bool> invoke;
+		internal static delegate* unmanaged[Cdecl]<IntPtr, byte[], Bool> invoke;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ActorType, IntPtr> toActor;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ComponentType, IntPtr> toComponent;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, uint> getID;
@@ -1470,6 +1480,7 @@ namespace UnrealEngine.Framework {
 		internal static delegate* unmanaged[Cdecl]<string, ActorType, IntPtr> getActorByTag;
 		internal static delegate* unmanaged[Cdecl]<uint, ActorType, IntPtr> getActorByID;
 		internal static delegate* unmanaged[Cdecl]<IntPtr> getFirstPlayerController;
+		internal static delegate* unmanaged[Cdecl]<IntPtr> getGameMode;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, void> setOnActorBeginOverlapCallback;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, void> setOnActorEndOverlapCallback;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, void> setOnActorHitCallback;
@@ -1576,6 +1587,10 @@ namespace UnrealEngine.Framework {
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ActorEventType, void> unregisterEvent;
 	}
 
+	unsafe partial class GameModeBase {
+		internal static delegate* unmanaged[Cdecl]<IntPtr, IntPtr, IntPtr, void> swapPlayerControllers;
+	}
+
 	unsafe partial class TriggerBase { }
 
 	unsafe partial class TriggerBox { }
@@ -1585,6 +1600,8 @@ namespace UnrealEngine.Framework {
 	unsafe partial class TriggerSphere { }
 
 	unsafe partial class Pawn {
+		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool> isControlled;
+		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool> isPlayerControlled;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, AutoPossessAI> getAutoPossessAI;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, AutoReceiveInput> getAutoPossessPlayer;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool> getUseControllerRotationYaw;
@@ -1899,6 +1916,7 @@ namespace UnrealEngine.Framework {
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ref Vector3, void> getUnfixedCameraPosition;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ref Quaternion, void> getDesiredRotation;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, ref Quaternion, void> getTargetRotation;
+		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool> getUsePawnControlRotation;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool, void> setDrawDebugLagMarkers;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool, void> setCollisionTest;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool, void> setCameraPositionLag;
@@ -1916,6 +1934,7 @@ namespace UnrealEngine.Framework {
 		internal static delegate* unmanaged[Cdecl]<IntPtr, in Vector3, void> setSocketOffset;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, float, void> setTargetArmLength;
 		internal static delegate* unmanaged[Cdecl]<IntPtr, in Vector3, void> setTargetOffset;
+		internal static delegate* unmanaged[Cdecl]<IntPtr, Bool, void> setUsePawnControlRotation;
 	}
 
 	unsafe partial class PostProcessComponent {

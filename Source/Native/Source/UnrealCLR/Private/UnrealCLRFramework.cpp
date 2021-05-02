@@ -1,5 +1,5 @@
 /*
- *  Unreal Engine 4 .NET 5 integration 
+ *  Unreal Engine 4 .NET 5 integration
  *  Copyright (c) 2021 Stanislav Denisov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -113,6 +113,9 @@ namespace UnrealCLRFramework {
 				break;\
 			case ActorType::LevelScript:\
 				Result = Head ALevelScriptActor Tail;\
+				break;\
+			case ActorType::GameModeBase:\
+				Result = Head AGameModeBase Tail;\
 				break;\
 			default:\
 				break;\
@@ -384,11 +387,10 @@ namespace UnrealCLRFramework {
 
 	static_assert(sizeof(Bounds) == 28, "Invalid size of the [Bounds] structure");
 	static_assert(sizeof(CollisionShape) == 16, "Invalid size of the [CollisionShape] structure");
-	static_assert(sizeof(Transform) == 48, "Invalid size of the [Transform] structure");
 
 	namespace Assert {
-		void OutputMessage(const char* Message) {
-			FString message(ANSI_TO_TCHAR(Message));
+		void OutputMessage(const uint8* Message) {
+			FString message(UTF8_TO_TCHAR(Message));
 
 			UE_LOG(LogUnrealManaged, Error, TEXT("%s: %s"), ANSI_TO_TCHAR(__FUNCTION__), *message);
 
@@ -413,8 +415,8 @@ namespace UnrealCLRFramework {
 	}
 
 	namespace Debug {
-		void Log(LogLevel Level, const char* Message) {
-			#define UNREALCLR_FRAMEWORK_LOG(Verbosity) UE_LOG(LogUnrealManaged, Verbosity, TEXT("%s: %s"), ANSI_TO_TCHAR(__FUNCTION__), *FString(ANSI_TO_TCHAR(Message)));
+		void Log(LogLevel Level, const uint8* Message) {
+			#define UNREALCLR_FRAMEWORK_LOG(Verbosity) UE_LOG(LogUnrealManaged, Verbosity, TEXT("%s: %s"), ANSI_TO_TCHAR(__FUNCTION__), *FString(UTF8_TO_TCHAR(Message)));
 
 			if (Level == LogLevel::Display) {
 				UNREALCLR_FRAMEWORK_LOG(Display);
@@ -427,12 +429,12 @@ namespace UnrealCLRFramework {
 			}
 		}
 
-		void HandleException(const char* Message) {
-			GEngine->AddOnScreenDebugMessage((uint64)-1, 10.0f, FColor::Red, *FString(ANSI_TO_TCHAR(Message)));
+		void Exception(const uint8* Message) {
+			GEngine->AddOnScreenDebugMessage((uint64)-1, 10.0f, FColor::Red, *FString(UTF8_TO_TCHAR(Message)));
 		}
 
-		void AddOnScreenMessage(int32 Key, float TimeToDisplay, Color DisplayColor, const char* Message) {
-			GEngine->AddOnScreenDebugMessage((uint64)Key, TimeToDisplay, DisplayColor, *FString(ANSI_TO_TCHAR(Message)));
+		void AddOnScreenMessage(int32 Key, float TimeToDisplay, Color DisplayColor, const uint8* Message) {
+			GEngine->AddOnScreenDebugMessage((uint64)Key, TimeToDisplay, DisplayColor, *FString(UTF8_TO_TCHAR(Message)));
 		}
 
 		void ClearOnScreenMessages() {
@@ -557,10 +559,10 @@ namespace UnrealCLRFramework {
 			Object->Rename(*name);
 		}
 
-		bool Invoke(UObject* Object, const char* Command) {
+		bool Invoke(UObject* Object, const uint8* Command) {
 			static FOutputDeviceNull outputDevice;
 
-			return Object->CallFunctionByNameWithArguments(ANSI_TO_TCHAR(Command), outputDevice, nullptr, true);
+			return Object->CallFunctionByNameWithArguments(UTF8_TO_TCHAR(Command), outputDevice, nullptr, true);
 		}
 
 		AActor* ToActor(UObject* Object, ActorType Type) {
@@ -1138,6 +1140,10 @@ namespace UnrealCLRFramework {
 			return UnrealCLR::Engine::World->GetFirstPlayerController();
 		}
 
+		AGameModeBase* GetGameMode() {
+			return UnrealCLR::Engine::World->GetAuthGameMode();
+		}
+
 		void SetOnActorBeginOverlapCallback(ActorOverlapDelegate Callback) {
 			UnrealCLR::Shared::Events[UnrealCLR::OnActorBeginOverlap] = (void*)Callback;
 		}
@@ -1676,7 +1682,21 @@ namespace UnrealCLRFramework {
 		}
 	}
 
+	namespace GameModeBase {
+		void SwapPlayerControllers(AGameModeBase* GameModeBase, APlayerController* PlayerController, APlayerController* NewPlayerController) {
+			GameModeBase->SwapPlayerControllers(PlayerController, NewPlayerController);
+		}
+	}
+
 	namespace Pawn {
+		bool IsControlled(APawn* Pawn) {
+			return Pawn->IsPawnControlled();
+		}
+
+		bool IsPlayerControlled(APawn* Pawn) {
+			return Pawn->IsPlayerControlled();
+		}
+
 		AutoPossessAI GetAutoPossessAI(APawn* Pawn) {
 			return Pawn->AutoPossessAI;
 		}
@@ -2507,7 +2527,7 @@ namespace UnrealCLRFramework {
 		}
 
 		void SetWorldTransform(USceneComponent* SceneComponent, const Transform* Transform) {
-			SceneComponent->SetWorldTransform(FTransform(Transform->GetRotation(), Transform->GetTranslation(), Transform->GetScale3D()));
+			SceneComponent->SetWorldTransform(*Transform);
 		}
 	}
 
@@ -2712,6 +2732,10 @@ namespace UnrealCLRFramework {
 			*Value = SpringArmComponent->GetTargetRotation().Quaternion();
 		}
 
+		bool GetUsePawnControlRotation(USpringArmComponent* SpringArmComponent) {
+			return SpringArmComponent->bUsePawnControlRotation;
+		}
+
 		void SetDrawDebugLagMarkers(USpringArmComponent* SpringArmComponent, bool Value) {
 			SpringArmComponent->bDrawDebugLagMarkers = Value;
 		}
@@ -2778,6 +2802,10 @@ namespace UnrealCLRFramework {
 
 		void SetTargetOffset(USpringArmComponent* SpringArmComponent, const Vector3* Value) {
 			SpringArmComponent->TargetOffset = *Value;
+		}
+
+		void SetUsePawnControlRotation(USpringArmComponent* SpringArmComponent, bool value) {
+			SpringArmComponent->bUsePawnControlRotation = value;
 		}
 	}
 
@@ -3390,7 +3418,15 @@ namespace UnrealCLRFramework {
 		}
 
 		bool BatchUpdateInstanceTransforms(UInstancedStaticMeshComponent* InstancedStaticMeshComponent, int32 StartInstanceIndex, int32 EndInstanceIndex, const Transform InstanceTransforms[], bool WorldSpace, bool MarkRenderStateDirty, bool Teleport) {
-			return InstancedStaticMeshComponent->BatchUpdateInstancesTransforms(StartInstanceIndex, TArray<FTransform>(InstanceTransforms, EndInstanceIndex), WorldSpace, MarkRenderStateDirty, Teleport);
+			static TArray<FTransform> instanceTransforms;
+
+			instanceTransforms.Reset();
+
+			for (int32 i = 0; i < EndInstanceIndex; i++) {
+				instanceTransforms.Add(InstanceTransforms[i]);
+			}
+
+			return InstancedStaticMeshComponent->BatchUpdateInstancesTransforms(StartInstanceIndex, instanceTransforms, WorldSpace, MarkRenderStateDirty, Teleport);
 		}
 
 		bool RemoveInstance(UInstancedStaticMeshComponent* InstancedStaticMeshComponent, int32 InstanceIndex) {

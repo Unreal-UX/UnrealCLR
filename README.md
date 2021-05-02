@@ -2,7 +2,7 @@
 	<img src="https://i.imgur.com/c6Zn7SE.png" alt="alt logo">
 </p>
 
-[![PayPal](https://github.com/Rageware/Shields/blob/master/paypal.svg)](https://www.paypal.me/nxrighthere) [![Bountysource](https://github.com/Rageware/Shields/blob/master/bountysource.svg)](https://salt.bountysource.com/checkout/amount?team=nxrighthere) [![Coinbase](https://github.com/Rageware/Shields/blob/master/coinbase.svg)](https://commerce.coinbase.com/checkout/03e11816-b6fc-4e14-b974-29a1d0886697)
+[![PayPal](https://github.com/Rageware/Shields/blob/master/paypal.svg)](https://www.paypal.me/nxrighthere) [![Coinbase](https://github.com/Rageware/Shields/blob/master/coinbase.svg)](https://commerce.coinbase.com/checkout/03e11816-b6fc-4e14-b974-29a1d0886697)
 
 UnrealCLR is a plugin which natively integrates .NET host into the Unreal Engine with the Common Language Runtime for direct execution of managed code to build a game/application logic using the full power of C# 9.0, F# 5.0, and .NET facilities with engine API. The project is aimed at stability, performance, and maintainability.
 
@@ -36,7 +36,7 @@ Building
 ### Prerequisites
 - Unreal Engine 4.25.4 or higher
 - A native [compilation toolchain](https://docs.unrealengine.com/en-US/Programming/Development/VisualStudioSetup/index.html#runtheunrealenginepre-requisiteinstaller) with platform-specific dependencies
-- [.NET 5 SDK 5.0.102](https://dotnet.microsoft.com/download/dotnet/5.0)
+- [.NET 5 SDK 5.0.202](https://dotnet.microsoft.com/download/dotnet/5.0)
 
 ### Auto
 

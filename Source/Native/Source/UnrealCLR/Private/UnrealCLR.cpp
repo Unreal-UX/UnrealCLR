@@ -1,5 +1,5 @@
 /*
- *  Unreal Engine 4 .NET 5 integration 
+ *  Unreal Engine 4 .NET 5 integration
  *  Copyright (c) 2021 Stanislav Denisov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,7 +28,7 @@
 DEFINE_LOG_CATEGORY(LogUnrealCLR);
 
 void UnrealCLR::Module::StartupModule() {
-	#define HOSTFXR_VERSION "5.0.2"
+	#define HOSTFXR_VERSION "5.0.5"
 	#define HOSTFXR_WINDOWS "/hostfxr.dll"
 	#define HOSTFXR_MAC "/libhostfxr.dylib"
 	#define HOSTFXR_LINUX "/libhostfxr.so"
@@ -177,7 +177,7 @@ void UnrealCLR::Module::StartupModule() {
 				Shared::Functions[position++] = Shared::DebugFunctions;
 
 				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::Log;
-				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::HandleException;
+				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::Exception;
 				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::AddOnScreenMessage;
 				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::ClearOnScreenMessages;
 				Shared::DebugFunctions[head++] = (void*)&UnrealCLRFramework::Debug::DrawBox;
@@ -322,6 +322,7 @@ void UnrealCLR::Module::StartupModule() {
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::GetActorByTag;
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::GetActorByID;
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::GetFirstPlayerController;
+				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::GetGameMode;
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::SetOnActorBeginOverlapCallback;
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::SetOnActorBeginCursorOverCallback;
 				Shared::WorldFunctions[head++] = (void*)&UnrealCLRFramework::World::SetOnActorEndCursorOverCallback;
@@ -462,8 +463,19 @@ void UnrealCLR::Module::StartupModule() {
 
 			{
 				int32 head = 0;
+				Shared::Functions[position++] = Shared::GameModeBaseFunctions;
+
+				Shared::GameModeBaseFunctions[head++] = (void*)&UnrealCLRFramework::GameModeBase::SwapPlayerControllers;
+
+				checksum += head;
+			}
+
+			{
+				int32 head = 0;
 				Shared::Functions[position++] = Shared::PawnFunctions;
 
+				Shared::PawnFunctions[head++] = (void*)&UnrealCLRFramework::Pawn::IsControlled;
+				Shared::PawnFunctions[head++] = (void*)&UnrealCLRFramework::Pawn::IsPlayerControlled;
 				Shared::PawnFunctions[head++] = (void*)&UnrealCLRFramework::Pawn::GetAutoPossessAI;
 				Shared::PawnFunctions[head++] = (void*)&UnrealCLRFramework::Pawn::GetAutoPossessPlayer;
 				Shared::PawnFunctions[head++] = (void*)&UnrealCLRFramework::Pawn::GetUseControllerRotationYaw;
@@ -844,6 +856,7 @@ void UnrealCLR::Module::StartupModule() {
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::GetUnfixedCameraPosition;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::GetDesiredRotation;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::GetTargetRotation;
+				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::GetUsePawnControlRotation;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetDrawDebugLagMarkers;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetCollisionTest;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetCameraPositionLag;
@@ -861,6 +874,7 @@ void UnrealCLR::Module::StartupModule() {
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetSocketOffset;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetTargetArmLength;
 				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetTargetOffset;
+				Shared::SpringArmComponentFunctions[head++] = (void*)&UnrealCLRFramework::SpringArmComponent::SetUsePawnControlRotation;
 
 				checksum += head;
 			}

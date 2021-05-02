@@ -1,5 +1,5 @@
 /*
- *  Unreal Engine 4 .NET 5 integration 
+ *  Unreal Engine 4 .NET 5 integration
  *  Copyright (c) 2021 Stanislav Denisov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -3335,7 +3335,7 @@ namespace UnrealEngine.Framework {
 			if (message != null)
 				stringBuffer.AppendFormat(" with message: {0}", message);
 
-			outputMessage(stringBuffer.ToString());
+			outputMessage(Encoding.UTF8.GetBytes(stringBuffer.ToString()));
 
 			Debugger.Break();
 		}
@@ -3427,7 +3427,7 @@ namespace UnrealEngine.Framework {
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
-			log(level, message);
+			log(level, Encoding.UTF8.GetBytes(message));
 		}
 
 		/// <summary>
@@ -3444,7 +3444,7 @@ namespace UnrealEngine.Framework {
 			.AppendLine().AppendFormat("Source: {0}", exception.Source)
 			.AppendLine();
 
-			handleException(stringBuffer.ToString());
+			Debug.exception(Encoding.UTF8.GetBytes(stringBuffer.ToString()));
 
 			using (StreamWriter streamWriter = File.AppendText(Application.ProjectDirectory + "Saved/Logs/Exceptions-" + Assembly.GetCallingAssembly().GetName().Name + ".log")) {
 				streamWriter.WriteLine(stringBuffer);
@@ -3459,7 +3459,7 @@ namespace UnrealEngine.Framework {
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
 
-			addOnScreenMessage(key, timeToDisplay, displayColor.ToArgb(), message);
+			addOnScreenMessage(key, timeToDisplay, displayColor.ToArgb(), Encoding.UTF8.GetBytes(message));
 		}
 
 		/// <summary>
@@ -4039,6 +4039,19 @@ namespace UnrealEngine.Framework {
 		/// <returns>A player controller or <c>null</c> if there is none</returns>
 		public static PlayerController GetFirstPlayerController() {
 			IntPtr pointer = getFirstPlayerController();
+
+			if (pointer != IntPtr.Zero)
+				return new(pointer);
+
+			return null;
+		}
+
+		/// <summary>
+		/// Returns the current game mode instance which is always valid during gameplay on the server
+		/// </summary>
+		/// <returns>A game mode or <c>null</c> on failure</returns>
+		public static GameModeBase GetGameMode() {
+			IntPtr pointer = getGameMode();
 
 			if (pointer != IntPtr.Zero)
 				return new(pointer);
@@ -5149,7 +5162,7 @@ namespace UnrealEngine.Framework {
 		/// <summary>
 		/// Invokes a command, function, or an event with optional arguments
 		/// </summary>
-		public bool Invoke(string command) => Object.invoke(Pointer, command);
+		public bool Invoke(string command) => Object.invoke(Pointer, Encoding.UTF8.GetBytes(command));
 
 		/// <summary>
 		/// Hides the actor
@@ -5443,6 +5456,30 @@ namespace UnrealEngine.Framework {
 	}
 
 	/// <summary>
+	/// Defines the game being played, instantiated only on the server
+	/// </summary>
+	public unsafe partial class GameModeBase : Actor {
+		internal override ActorType Type => ActorType.GameModeBase;
+
+		private protected GameModeBase() { }
+
+		internal GameModeBase(IntPtr pointer) => Pointer = pointer;
+
+		/// <summary>
+		/// Swaps player controllers
+		/// </summary>
+		public void SwapPlayerControllers(PlayerController playerController, PlayerController newPlayerController) {
+			if (playerController == null)
+				throw new ArgumentNullException(nameof(playerController));
+
+			if (newPlayerController == null)
+				throw new ArgumentNullException(nameof(newPlayerController));
+
+			swapPlayerControllers(Pointer, playerController.Pointer, newPlayerController.Pointer);
+		}
+	}
+
+	/// <summary>
 	/// The base class of actors that can be possessed by players or AI
 	/// </summary>
 	public unsafe partial class Pawn : Actor {
@@ -5466,6 +5503,16 @@ namespace UnrealEngine.Framework {
 
 			Pointer = spawn(name, Type, blueprint != null ? blueprint.Pointer : IntPtr.Zero);
 		}
+
+		/// <summary>
+		/// Returns <c>true</c> if the pawn is possesed by a <see cref="Controller"/>
+		/// </summary>
+		public bool IsControlled => isControlled(Pointer);
+
+		/// <summary>
+		/// Returns <c>true</c> if the pawn is possesed by a <see cref="PlayerController"/>
+		/// </summary>
+		public bool IsPlayerControlled => isPlayerControlled(Pointer);
 
 		/// <summary>
 		/// Gets or sets the automatic possession type by an AI controller
@@ -6833,7 +6880,7 @@ namespace UnrealEngine.Framework {
 		/// <summary>
 		/// Invokes a command, function, or an event with optional arguments
 		/// </summary>
-		public bool Invoke(string command) => Object.invoke(Pointer, command);
+		public bool Invoke(string command) => Object.invoke(Pointer, Encoding.UTF8.GetBytes(command));
 
 		/// <summary>
 		/// Returns the current active animation montage or <c>null</c> on failure
@@ -7849,7 +7896,7 @@ namespace UnrealEngine.Framework {
 		/// <summary>
 		/// Invokes a command, function, or an event with optional arguments
 		/// </summary>
-		public bool Invoke(string command) => Object.invoke(Pointer, command);
+		public bool Invoke(string command) => Object.invoke(Pointer, Encoding.UTF8.GetBytes(command));
 
 		/// <summary>
 		/// Unregisters the component, removes it from its outer actor's components array and marks for pending kill
@@ -8760,6 +8807,14 @@ namespace UnrealEngine.Framework {
 		public float TargetArmLength {
 			get => getTargetArmLength(Pointer);
 			set => setTargetArmLength(Pointer, value);
+		}
+
+		/// <summary>
+		/// Gets or sets if the component should use the view/control rotation of the pawn
+		/// </summary>
+		public bool UsePawnControlRotation {
+			get => getUsePawnControlRotation(Pointer);
+			set => setUsePawnControlRotation(Pointer, value);
 		}
 
 		/// <summary>
@@ -9692,7 +9747,7 @@ namespace UnrealEngine.Framework {
 		public void SetScale(in Vector2 value) => setScale(Pointer, value);
 
 		/// <summary>
-		/// Sets the world size of the text 
+		/// Sets the world size of the text
 		/// </summary>
 		public void SetWorldSize(float value) => setWorldSize(Pointer, value);
 	}

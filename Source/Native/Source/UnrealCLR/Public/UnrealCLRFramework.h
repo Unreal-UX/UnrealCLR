@@ -1,5 +1,5 @@
 /*
- *  Unreal Engine 4 .NET 5 integration 
+ *  Unreal Engine 4 .NET 5 integration
  *  Copyright (c) 2021 Stanislav Denisov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,7 +51,6 @@ namespace UnrealCLRFramework {
 
 	using Bounds = FBoxSphereBounds;
 	using CollisionShape = FCollisionShape;
-	using Transform = FTransform;
 
 	enum struct LogLevel : int32 {
 		Display,
@@ -163,6 +162,19 @@ namespace UnrealCLRFramework {
 		FORCEINLINE operator FQuat() const { return FQuat(X, Y, Z, W); }
 	};
 
+	struct Transform {
+		Vector3 Location;
+		Quaternion Rotation;
+		Vector3 Scale;
+
+		FORCEINLINE Transform(const FTransform& Value) :
+			Location(Value.GetTranslation()),
+			Rotation(Value.GetRotation()),
+			Scale(Value.GetScale3D()) { }
+
+		FORCEINLINE operator FTransform() const { return FTransform(Rotation, Location, Scale); }
+	};
+
 	struct LinearColor {
 		float R;
 		float G;
@@ -266,7 +278,8 @@ namespace UnrealCLRFramework {
 		SpotLight,
 		TriggerVolume,
 		PostProcessVolume,
-		LevelScript
+		LevelScript,
+		GameModeBase
 	};
 
 	enum struct ComponentType : int32 {
@@ -298,7 +311,7 @@ namespace UnrealCLRFramework {
 	// Non-instantiable
 
 	namespace Assert {
-		static void OutputMessage(const char* Message);
+		static void OutputMessage(const uint8* Message);
 	}
 
 	namespace CommandLine {
@@ -308,9 +321,9 @@ namespace UnrealCLRFramework {
 	}
 
 	namespace Debug {
-		static void Log(LogLevel Level, const char* Message);
-		static void HandleException(const char* Exception);
-		static void AddOnScreenMessage(int32 Key, float TimeToDisplay, Color DisplayColor, const char* Message);
+		static void Log(LogLevel Level, const uint8* Message);
+		static void Exception(const uint8* Exception);
+		static void AddOnScreenMessage(int32 Key, float TimeToDisplay, Color DisplayColor, const uint8* Message);
 		static void ClearOnScreenMessages();
 		static void DrawBox(const Vector3* Center, const Vector3* Extent, const Quaternion* Rotation, Color Color, bool PersistentLines, float LifeTime, uint8 DepthPriority, float Thickness);
 		static void DrawCapsule(const Vector3* Center, float HalfHeight, float Radius, const Quaternion* Rotation, Color Color, bool PersistentLines, float LifeTime, uint8 DepthPriority, float Thickness);
@@ -327,7 +340,7 @@ namespace UnrealCLRFramework {
 		static bool IsValid(UObject* Object);
 		static UObject* Load(ObjectType Type, const char* Name);
 		static void Rename(UObject* Object, const char* Name);
-		static bool Invoke(UObject* Object, const char* Command);
+		static bool Invoke(UObject* Object, const uint8* Command);
 		static AActor* ToActor(UObject* Object, ActorType Type);
 		static UActorComponent* ToComponent(UObject* Object, ComponentType Type);
 		static uint32 GetID(UObject* Object);
@@ -424,6 +437,7 @@ namespace UnrealCLRFramework {
 		static AActor* GetActorByTag(const char* Tag, ActorType Type);
 		static AActor* GetActorByID(uint32 ID, ActorType Type);
 		static APlayerController* GetFirstPlayerController();
+		static AGameModeBase* GetGameMode();
 		static void SetOnActorBeginOverlapCallback(ActorOverlapDelegate Callback);
 		static void SetOnActorEndOverlapCallback(ActorOverlapDelegate Callback);
 		static void SetOnActorHitCallback(ActorHitDelegate Callback);
@@ -532,6 +546,10 @@ namespace UnrealCLRFramework {
 		static void UnregisterEvent(AActor* Actor, ActorEventType Type);
 	}
 
+	namespace GameModeBase {
+		static void SwapPlayerControllers(AGameModeBase* GameModeBase, APlayerController* PlayerController, APlayerController* NewPlayerController);
+	}
+
 	namespace TriggerBase { }
 
 	namespace TriggerBox { }
@@ -541,6 +559,8 @@ namespace UnrealCLRFramework {
 	namespace TriggerSphere { }
 
 	namespace Pawn {
+		static bool IsControlled(APawn* Pawn);
+		static bool IsPlayerControlled(APawn* Pawn);
 		static AutoPossessAI GetAutoPossessAI(APawn* Pawn);
 		static AutoReceiveInput GetAutoPossessPlayer(APawn* Pawn);
 		static bool GetUseControllerRotationYaw(APawn* Pawn);
@@ -873,6 +893,7 @@ namespace UnrealCLRFramework {
 		static void GetUnfixedCameraPosition(USpringArmComponent* SpringArmComponent, Vector3* Value);
 		static void GetDesiredRotation(USpringArmComponent* SpringArmComponent, Quaternion* Value);
 		static void GetTargetRotation(USpringArmComponent* SpringArmComponent, Quaternion* Value);
+		static bool GetUsePawnControlRotation(USpringArmComponent* SpringArmComponent);
 		static void SetDrawDebugLagMarkers(USpringArmComponent* SpringArmComponent, bool Value);
 		static void SetCollisionTest(USpringArmComponent* SpringArmComponent, bool Value);
 		static void SetCameraPositionLag(USpringArmComponent* SpringArmComponent, bool Value);
@@ -890,6 +911,7 @@ namespace UnrealCLRFramework {
 		static void SetSocketOffset(USpringArmComponent* SpringArmComponent, const Vector3* Value);
 		static void SetTargetArmLength(USpringArmComponent* SpringArmComponent, float Value);
 		static void SetTargetOffset(USpringArmComponent* SpringArmComponent, const Vector3* Value);
+		static void SetUsePawnControlRotation(USpringArmComponent* SpringArmComponent, bool value);
 	}
 
 	namespace PostProcessComponent {
